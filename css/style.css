@@ -1,0 +1,192 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --premary-color: #b8b8b5;
+    --secend-color: #0000fff7;
+    --red: #d80000;
+}
+
+.parent {
+    position: relative;
+    background: whitesmoke;
+    height: 100vh;
+}
+
+.parent .content {
+    width: 80%;
+    margin: auto;
+    padding-top: 50px;
+}
+
+.parent .content .head h3 {
+    font-size: xxx-large;
+}
+
+.parent .content .head p {
+    color: var(--premary-color)
+}
+
+.parent .content .box {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    background-color: white;
+    margin-top: 50px;
+    padding: 20px;
+    border: 1px solid;
+    border-radius: 10px;
+    position: relative;
+    /* height: 30vh; */
+}
+
+.parent .content .box.error {
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+    padding: 10px;
+    color: var(--red);
+    border-color: var(--red);
+}
+
+#switch-to,
+#from {
+    border-radius: 38px;
+    padding: 10px;
+    font-size: 16px;
+    width: 100%;
+    cursor: pointer;
+}
+
+.icon-spin {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding-top: 115.1px;
+    padding-bottom: 115PX;
+    z-index: 9999;
+    background-color: aliceblue;
+    opacity: .5;
+    cursor: progress;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-spin i {
+    font-size: 169px;
+}
+
+.parent .content .box .inputs {
+    width: 40%;
+    position: relative;
+}
+
+.parent .content .box .inputs>div {
+    padding-top: 40px;
+}
+
+.parent .content .box .inputs div .icon-choice {
+    position: absolute;
+    top: 42%;
+    right: 22px;
+    cursor: pointer;
+}
+
+.parent .content .box .inputs div .icon-choice-to {
+    position: absolute;
+    top: 66%;
+    right: 22px;
+    cursor: pointer;
+}
+
+#switch {
+    cursor: pointer;
+    color: var(--premary-color);
+    background-color: gainsboro;
+    height: 29px;
+    width: 17%;
+    text-align: center;
+    border-radius: 10px;
+    padding: 5px 0px;
+    position: absolute;
+    right: 0px;
+    bottom: 101px;
+}
+
+#switch:hover {
+    background-color: var(--secend-color);
+    color: white;
+}
+
+.parent .content .box .inputs>div>div {
+    padding-bottom: 6px;
+    color: var(--premary-color);
+}
+
+.parent .content .box .inputs>div:last-child {
+    padding-bottom: 40px;
+}
+
+.parent .content .box .inputs div #btn-convert {
+    cursor: pointer;
+    padding-right: 20px;
+}
+
+.parent .content .box .inputs div #btn-convert:hover {
+    background: var(--secend-color);
+    color: white;
+}
+
+.parent .content .box .inputs input.input {
+    width: 100%;
+    padding-top: 9px;
+    padding-bottom: 9px;
+    padding-left: 20px;
+    border: solid 1px;
+    border-radius: 4px;
+    outline: none;
+    font-size: large;
+}
+
+.parent .content .box .card {
+    margin-top: 71px;
+    border: 1px solid;
+    height: fit-content;
+    border-radius: 16px;
+    padding: 34px;
+    background-color: whitesmoke;
+}
+
+.card>div {
+    padding: 10px 0;
+}
+
+.card .amount-value {
+    font-size: larger;
+}
+
+.card .foreign {
+    font-size: xx-large;
+}
+
+.card .coin-salary {
+    color: var(--premary-color);
+}
+
+#rotate {
+    width: 100px;
+    cursor: pointer;
+    border: 1px solid var(--red);
+    border-radius: 3px;
+    padding: 4px 0;
+}
+
+#rotate:hover {
+    background-color: var(--red);
+    color: white;
+}
