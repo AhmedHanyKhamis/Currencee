@@ -14,7 +14,7 @@ let switchConin = document.getElementById('switch');
 let load = document.querySelector('.icon-spin');
 let saveCoin = [];
 let saveData = [];
-let cacheCurrence = {};
+let currencyCache = {};
 
 // ============================================
 // TOM SELECT
@@ -54,13 +54,21 @@ fetch("https://openexchangerates.org/api/currencies.json")
     .catch(() => errorState());
 
 function toCoin() {
-    load.style.display = 'flex';
     if (!base.value || !foreign.value) return;
+
+    // Check if rates for this base currency are already cached
+    if (currencyCache[base.value]) {
+        dataFromObj();
+        totalValue();
+        return;
+    }
+
+    load.style.display = 'flex';
 
     fetch(`https://www.floatrates.com/daily/${base.value}.json`)
         .then(response => response.json())
         .then(coin => {
-            cacheCurrence = { ...coin };
+            currencyCache[base.value] = coin;
             load.style.display = 'none';
             dataFromObj();
             totalValue();
@@ -72,11 +80,12 @@ function toCoin() {
 // FUNCTOINS
 // ============================================
 function dataFromObj() {
-    const keyCoin = foreign.value.toLowerCase();
+    const baseCurrency = base.value;
+    const foreignCurrency = foreign.value.toLowerCase();
 
-    if (cacheCurrence[keyCoin]) {
-        const one = cacheCurrence[keyCoin].rate;
-        const tow = cacheCurrence[keyCoin].inverseRate;
+    if (currencyCache[baseCurrency] && currencyCache[baseCurrency][foreignCurrency]) {
+        const one = currencyCache[baseCurrency][foreignCurrency].rate;
+        const tow = currencyCache[baseCurrency][foreignCurrency].inverseRate;
         saveCoin = [one, tow];
     }
 }
