@@ -1,5 +1,5 @@
 // ============================================
-// VARIABLE
+// DOM ELEMENTS
 // ============================================
 let base = document.getElementById('from');
 let amount = document.getElementById('amount');
@@ -19,33 +19,15 @@ let cacheCurrence = {};
 // ============================================
 // TOM SELECT
 // ============================================
-let s1 = new TomSelect("#from", {
+const tomSelectConfig = {
     maxItems: 1,
     minItems: 1,
-    valueField: 'value',
-    labelField: 'text',
-    searchField: 'text',
-    onDelete: function (values) {
-        return false;
-    },
-    onChange: function (value) {
-        syncDisabledOptions(value);
-    }
-});
+    maxOptions: null, // Allow all options
+    onChange: () => syncDisabledOptions()
+};
 
-let s2 = new TomSelect("#switch-to", {
-    maxItems: 1,
-    minItems: 1,
-    valueField: 'value',
-    labelField: 'text',
-    searchField: 'text',
-    onDelete: function (values) {
-        return false;
-    },
-    onChange: function (value) {
-        syncDisabledOptions(value);
-    }
-});
+const s1 = new TomSelect("#from", tomSelectConfig);
+const s2 = new TomSelect("#switch-to", tomSelectConfig);
 
 // ============================================
 // GET DATA FROM API
@@ -54,57 +36,62 @@ fetch("https://openexchangerates.org/api/currencies.json")
     .then(response => response.json())
     .then(data => {
         // save data in array
-        saveData.push(data)
-
-        // create option for select
-        Object.entries(data).forEach(function ([key, value]) {
-            // Add option to select
+        saveData.push(data);
+        // Create options for select
+        Object.entries(data).forEach(([key, value]) => {
             let optionData = { value: key, text: value };
-            s1.addOption(optionData)
-            s2.addOption(optionData)
-        })
 
-        // Add option to select
-        s1.setValue('USD')
-        s2.setValue('EGP')
+            s1.addOption(optionData);
+            s2.addOption(optionData);
+        });
 
-        // Sync disabled options after initial values are set
+        // Set default values
+        s1.setValue('USD');
+        s2.setValue('EGP');
         syncDisabledOptions();
-
         toCoin();
     })
-    .catch(function () {
-        errorState()
-    })
+    .catch(() => errorState());
 
 function toCoin() {
     load.style.display = 'flex';
     if (!base.value || !foreign.value) return;
 
     fetch(`https://www.floatrates.com/daily/${base.value}.json`)
-    .then(response => response.json())
-    .then(coin => {
-        cacheCurrence = { ...coin }
-        load.style.display = 'none';
-        dataFromObj()
-        totalValue();
-    }).catch(function () {
-        errorState()
-    })
+        .then(response => response.json())
+        .then(coin => {
+            cacheCurrence = { ...coin };
+            load.style.display = 'none';
+            dataFromObj();
+            totalValue();
+        })
+        .catch(() => errorState());
 }
 
 // ============================================
 // FUNCTOINS
 // ============================================
+function dataFromObj() {
+    const keyCoin = foreign.value.toLowerCase();
+
+    if (cacheCurrence[keyCoin]) {
+        const one = cacheCurrence[keyCoin].rate;
+        const tow = cacheCurrence[keyCoin].inverseRate;
+        saveCoin = [one, tow];
+    }
+}
+
 function totalValue() {
-    dataFromObj()
+    dataFromObj();
+
     price.innerHTML = `
         <div class="from-1">1 <span id="coin-now">${base.value}</span> = <span id="price-now">${saveCoin[0]}</span></div>
         <div class="to-1">1 <span id="coin-to">${foreign.value}</span> = <span id="price-to">${saveCoin[1]}</span></div>
-    `
+    `;
+
     let total = amount.value * saveCoin[0];
-    result.innerHTML = total.toFixed(2);
-    amountValue.innerHTML = amount.value
+    result.innerHTML = formatNumber(total.toFixed(3));
+    amountValue.innerHTML = formatNumber(amount.value);
     typeCoinForeign.innerHTML = foreign.value;
     typeCoinAmount.innerHTML = base.value;
 }
@@ -117,51 +104,19 @@ function switchValue() {
     s2.setValue(fromValue);
 
     toCoin();
-    totalValue();
 }
 
-function dataFromObj() {
-    let keyCoin = foreign.value.toLowerCase();
-    if (cacheCurrence[keyCoin]) {
-        let one = cacheCurrence[keyCoin].rate;
-        let tow = cacheCurrence[keyCoin].inverseRate;
-        saveCoin = [one, tow];
-    }
-}
+function syncDisabledOptions() {
+    let fromValue = s1.getValue();
+    let toValue = s2.getValue();
 
-/**
- * error state
- */
-function errorState() {
-    let box = document.querySelector('.box');
-    box.classList.add('error')
-    box.innerHTML = `
-    <div>
-        <i class="fa-solid fa-circle-exclamation" style="margin-inline-end: 5px;" ></i> error in connection, please check your internet
-    </div>
-    <button id="rotate">Refresh <i class="fas fa-refresh"></i></button>
-    `;
-    load.style.display = 'none';
-    rotate.addEventListener('click', function () {
-        location.reload()
-    })
-}
-
-/**
- * sync disabled options
- */
-function syncDisabledOptions(value) {
-    console.log(value)
-    const fromValue = s1.getValue();
-    const toValue = s2.getValue();
-
-    // ===== Enable all options first =====
+    // Enable all options first
     Object.keys(s1.options).forEach(key => {
         s1.updateOption(key, { ...s1.options[key], disabled: false });
         s2.updateOption(key, { ...s2.options[key], disabled: false });
     });
 
-    // ===== Disable selected option in the other select =====
+    // Disable selected option in the other select
     if (fromValue && s2.options[fromValue]) {
         s2.updateOption(fromValue, { ...s2.options[fromValue], disabled: true });
     }
@@ -171,27 +126,45 @@ function syncDisabledOptions(value) {
     }
 }
 
+/**
+ * Displays error state when API calls fail
+ */
+function errorState() {
+    const box = document.querySelector('.box');
+    box.classList.add('error');
+    box.innerHTML = `
+        <div>
+            <i class="fa-solid fa-circle-exclamation" style="margin-inline-end: 5px;"></i> error in connection, please check your internet
+        </div>
+        <button id="rotate">Refresh <i class="fas fa-refresh"></i></button>
+    `;
+    load.style.display = 'none';
+
+    document.getElementById('rotate').addEventListener('click', () => location.reload());
+}
+
+/**
+ * Formats a number with commas
+ */
+function formatNumber(num) {
+	if (num === null || num === undefined || isNaN(num)) return '';
+	return Number(num).toLocaleString('en-US');
+}
+
 // ============================================
 // EVENTS
 // ============================================
-amount.addEventListener('input', function () {
-    totalValue()
-    dataFromObj()
-})
+amount.addEventListener('input', () => totalValue());
 
-base.addEventListener('change', function () {
-    toCoin();
-    totalValue();
-})
+base.addEventListener('change', () => toCoin());
 
-foreign.addEventListener('change', function () {
+foreign.addEventListener('change', () => {
     dataFromObj();
     totalValue();
-})
+});
 
 switchConin.addEventListener('click', function () {
     switchValue();
-    [saveCoin[0], saveCoin[1]] = [saveCoin[1], saveCoin[0]]
-    totalValue()
-
-})
+    [saveCoin[0], saveCoin[1]] = [saveCoin[1], saveCoin[0]];
+    totalValue();
+});
